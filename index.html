@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>APPEARICH — Sugar Candy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<style>
+  :root{
+    --ink:#0c0a0b;
+    --plum:#3a1330;
+    --plum-deep:#26091f;
+    --gold:#c8a250;
+    --gold-bright:#e8cd8a;
+    --cream:#f2ece1;
+    --smoke:#948d84;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--ink); color:var(--cream);
+    font-family:'Manrope', sans-serif; overflow-x:hidden;
+  }
+  ::selection{ background:var(--gold); color:var(--ink); }
+
+  .atmosphere{
+    position:fixed; inset:0; z-index:0; pointer-events:none;
+    background:
+      radial-gradient(55% 45% at 72% 28%, rgba(200,162,80,0.14), transparent 60%),
+      radial-gradient(65% 55% at 22% 82%, rgba(58,19,48,0.55), transparent 65%),
+      #0c0a0b;
+  }
+  .grain{
+    position:fixed; inset:0; z-index:1; pointer-events:none; opacity:0.045;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  canvas#scene{
+    position:fixed; inset:0; z-index:2; width:100%; height:100%;
+    touch-action:none; cursor:grab;
+  }
+  canvas#scene:active{ cursor:grabbing; }
+
+  main{ position:relative; z-index:3; }
+
+  nav{
+    position:fixed; top:0; left:0; right:0; z-index:10;
+    display:flex; justify-content:space-between; align-items:center;
+    padding:26px 6vw; pointer-events:none;
+  }
+  nav .brand{ display:flex; align-items:center; gap:10px; pointer-events:auto; }
+  nav .brand svg{ width:16px; height:16px; }
+  nav .mark{
+    font-family:'Fraunces', serif; font-weight:500; font-size:14px;
+    letter-spacing:0.26em; text-transform:uppercase; color:var(--gold-bright);
+  }
+  nav .tag{ font-size:11px; letter-spacing:0.2em; text-transform:uppercase; color:var(--smoke); }
+
+  section{ position:relative; width:100%; }
+
+  /* ---------- HERO ---------- */
+  .hero{
+    height:100svh; display:flex; flex-direction:column; justify-content:flex-end;
+    padding:0 6vw 8vh; pointer-events:none;
+  }
+  .hero .eyebrow{
+    font-size:12px; letter-spacing:0.3em; text-transform:uppercase; color:var(--gold-bright);
+    margin-bottom:18px;
+  }
+  .hero h1{
+    font-family:'Fraunces', serif; font-weight:500; font-size:clamp(3rem, 10vw, 8rem);
+    line-height:0.92; letter-spacing:-0.01em; color:var(--cream);
+  }
+  .hero h1 em{ font-style:italic; font-weight:400; color:var(--gold-bright); }
+  .hero .sub{
+    margin-top:20px; max-width:36ch; font-size:15px; line-height:1.6; color:var(--smoke);
+  }
+  .hero .drag-hint{
+    position:absolute; bottom:8vh; right:6vw; font-size:11px; letter-spacing:0.15em;
+    text-transform:uppercase; color:var(--smoke); display:flex; align-items:center; gap:8px;
+  }
+  .hero .drag-hint .dot{
+    width:6px; height:6px; border-radius:50%; background:var(--gold-bright);
+    animation:pulse 1.8s infinite ease-in-out;
+  }
+  @keyframes pulse{ 0%,100%{opacity:0.3} 50%{opacity:1} }
+
+  /* ---------- NOTES ---------- */
+  .notes-wrap{ position:relative; height:300vh; }
+  .notes-pin{ position:sticky; top:0; height:100svh; display:flex; align-items:center; padding:0 6vw; }
+  .note-panel{ position:absolute; left:6vw; max-width:36ch; opacity:0; transform:translateY(24px); }
+  .note-panel .idx{
+    font-size:11px; letter-spacing:0.25em; text-transform:uppercase; color:var(--gold);
+    margin-bottom:14px; display:block;
+  }
+  .note-panel h2{
+    font-family:'Fraunces', serif; font-weight:400; font-size:clamp(2rem,5vw,3.4rem);
+    line-height:1.05; margin-bottom:16px;
+  }
+  .note-panel p{ font-size:15px; line-height:1.7; color:var(--smoke); }
+  .note-panel .list{ margin-top:18px; font-size:14px; color:var(--cream); letter-spacing:0.02em; }
+  .note-panel .list span{ color:var(--gold-bright); }
+  .note-panel .caveat{ margin-top:14px; font-size:11px; color:var(--smoke); font-style:italic; opacity:0.7; }
+
+  /* ---------- GALLERY ---------- */
+  .gallery-outer{ padding:14vh 0; }
+  .gallery-head{ padding:0 6vw 6vh; }
+  .gallery-head .eyebrow{ font-size:12px; letter-spacing:0.28em; text-transform:uppercase; color:var(--gold-bright); margin-bottom:14px; }
+  .gallery-head h2{ font-family:'Fraunces', serif; font-weight:400; font-size:clamp(1.8rem,4vw,3rem); max-width:18ch; }
+
+  .gallery{
+    display:flex; gap:24px; overflow-x:auto; scroll-snap-type:x mandatory;
+    padding:0 6vw 4vh; -webkit-overflow-scrolling:touch; scrollbar-width:none;
+  }
+  .gallery::-webkit-scrollbar{ display:none; }
+  .card{
+    flex:0 0 min(78vw, 420px); scroll-snap-align:start;
+    background:linear-gradient(160deg, rgba(255,255,255,0.05), rgba(255,255,255,0.015));
+    border:1px solid rgba(200,162,80,0.18); border-radius:2px;
+    padding:36px 30px; backdrop-filter:blur(6px);
+    min-height:340px; display:flex; flex-direction:column; justify-content:space-between;
+  }
+  .card .num{ font-family:'Fraunces', serif; font-style:italic; font-size:13px; color:var(--gold); }
+  .card h3{ font-family:'Fraunces', serif; font-weight:400; font-size:1.6rem; margin:26px 0 12px; }
+  .card p{ font-size:14px; line-height:1.7; color:var(--smoke); }
+
+  /* ---------- CLOSING ---------- */
+  .closing{
+    height:100svh; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center; padding:0 6vw;
+  }
+  .closing .eyebrow{ font-size:12px; letter-spacing:0.3em; text-transform:uppercase; color:var(--gold-bright); margin-bottom:20px; }
+  .closing h2{
+    font-family:'Fraunces', serif; font-weight:400; font-style:italic;
+    font-size:clamp(2.2rem,6.5vw,5rem); line-height:1; margin-bottom:34px;
+  }
+  .closing .cta{
+    pointer-events:auto; border:1px solid var(--gold-bright); color:var(--cream);
+    background:transparent; padding:16px 42px; font-family:'Manrope',sans-serif;
+    font-size:13px; letter-spacing:0.2em; text-transform:uppercase; cursor:pointer;
+    transition:background 0.35s ease, color 0.35s ease;
+  }
+  .closing .cta:hover{ background:var(--gold-bright); color:var(--ink); }
+  .closing .contact{ margin-top:22px; font-size:12px; letter-spacing:0.1em; color:var(--smoke); }
+  .closing footer{
+    position:absolute; bottom:5vh; font-size:11px; letter-spacing:0.15em; color:var(--smoke);
+    text-transform:uppercase;
+  }
+
+  .edit-note{
+    position:fixed; bottom:14px; left:14px; z-index:20; font-size:10px; letter-spacing:0.05em;
+    color:rgba(242,236,225,0.35); max-width:220px; pointer-events:none; line-height:1.5;
+  }
+
+  @media (max-width:640px){
+    .note-panel{ max-width:80vw; }
+    .notes-wrap{ height:340vh; }
+  }
+</style>
+</head>
+<body>
+
+<div class="atmosphere"></div>
+<div class="grain"></div>
+<canvas id="scene"></canvas>
+
+<nav>
+  <div class="brand">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" style="color:var(--gold-bright)">
+      <circle cx="12" cy="4.5" r="1.6"/>
+      <path d="M9 8h6l1.5 11a1 1 0 0 1-1 1.1H8.5a1 1 0 0 1-1-1.1L9 8z"/>
+    </svg>
+    <div class="mark">Appearich</div>
+  </div>
+  <div class="tag">Extrait de Parfum</div>
+</nav>
+
+<main>
+  <section class="hero">
+    <div class="eyebrow">Appearich Perfumes — Sugar Candy</div>
+    <h1>Smell <em>Good.</em></h1>
+    <p class="sub">Sugar Candy is Appearich's signature extrait — a warm, sweet gourmand built to be noticed. This is the refresh you need.</p>
+    <div class="drag-hint"><span class="dot"></span> Drag to turn the bottle</div>
+  </section>
+
+  <section class="notes-wrap">
+    <div class="notes-pin">
+      <div class="note-panel" data-note="0">
+        <span class="idx">Opening</span>
+        <h2>Top Notes</h2>
+        <p>The first spray. Bright and sugared, like biting into something sweet.</p>
+        <div class="list"><span>Bergamot</span> · <span>Pink Pepper</span> · <span>Citrus Zest</span></div>
+        <p class="caveat">Placeholder notes — swap in Sugar Candy's real notes here.</p>
+      </div>
+      <div class="note-panel" data-note="1">
+        <span class="idx">The Heart</span>
+        <h2>Heart Notes</h2>
+        <p>Where it settles into skin. Soft, candied, and unmistakably Appearich.</p>
+        <div class="list"><span>Vanilla Sugar</span> · <span>Praline</span> · <span>Jasmine</span></div>
+      </div>
+      <div class="note-panel" data-note="2">
+        <span class="idx">What Remains</span>
+        <h2>Base Notes</h2>
+        <p>Hours later. Warm, sweet, and impossible to forget — the whole point.</p>
+        <div class="list"><span>Caramel</span> · <span>Musk</span> · <span>Amber</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="gallery-outer">
+    <div class="gallery-head">
+      <div class="eyebrow">The Details</div>
+      <h2>Every part of Sugar Candy was made to be turned over in the hand.</h2>
+    </div>
+    <div class="gallery">
+      <div class="card">
+        <span class="num">01</span>
+        <div>
+          <h3>Fluted glass</h3>
+          <p>A ribbed bottle that catches the light from every angle, capped in matte black.</p>
+        </div>
+      </div>
+      <div class="card">
+        <span class="num">02</span>
+        <div>
+          <h3>Extrait strength</h3>
+          <p>Concentrated well above standard eau de parfum, for wear that lasts all day.</p>
+        </div>
+      </div>
+      <div class="card">
+        <span class="num">03</span>
+        <div>
+          <h3>Signature label</h3>
+          <p>Deep plum and gold foil — the same mark on every bottle in the Appearich line.</p>
+        </div>
+      </div>
+      <div class="card">
+        <span class="num">04</span>
+        <div>
+          <h3>Gift-ready case</h3>
+          <p>Arrives in Appearich's matte black cylinder, foil-stamped and ready to give.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="closing">
+    <div class="eyebrow">Sugar Candy — Extrait de Parfum</div>
+    <h2>Own the refresh.</h2>
+    <button class="cta">Shop Now</button>
+    <div class="contact">@Appearich · 0764 519 027</div>
+    <footer>Appearich Perfumes</footer>
+  </section>
+</main>
+
+<div class="edit-note">Placeholder notes &amp; price — swap in your real product details.</div>
+
+<script>
+gsap.registerPlugin(ScrollTrigger);
+
+/* ---------------- THREE.JS SCENE ---------------- */
+const canvas = document.getElementById('scene');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias:true, alpha:true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setSize(window.innerWidth, window.innerHeight);
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(32, window.innerWidth/window.innerHeight, 0.1, 100);
+camera.position.set(0, 0.7, 7);
+
+// ---- lights ----
+const ambient = new THREE.AmbientLight(0x2a1522, 0.75);
+scene.add(ambient);
+
+const keyLight = new THREE.PointLight(0xffdca0, 1.7, 20);
+keyLight.position.set(3, 4, 4);
+scene.add(keyLight);
+
+const rimLight = new THREE.PointLight(0xb06fc0, 1.0, 20);
+rimLight.position.set(-4, 1, -3);
+scene.add(rimLight);
+
+const glowLight = new THREE.PointLight(0xc8a250, 1.3, 12);
+glowLight.position.set(0, -1.2, 2.2);
+scene.add(glowLight);
+
+function makeGlowTexture(){
+  const size = 256;
+  const c = document.createElement('canvas');
+  c.width = c.height = size;
+  const ctx = c.getContext('2d');
+  const g = ctx.createRadialGradient(size/2,size/2,0,size/2,size/2,size/2);
+  g.addColorStop(0, 'rgba(232,205,138,0.85)');
+  g.addColorStop(0.5, 'rgba(150,60,120,0.22)');
+  g.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = g;
+  ctx.fillRect(0,0,size,size);
+  return new THREE.CanvasTexture(c);
+}
+const glowSprite = new THREE.Sprite(new THREE.SpriteMaterial({
+  map: makeGlowTexture(), transparent:true, blending:THREE.AdditiveBlending, depthWrite:false
+}));
+glowSprite.scale.set(6,6,1);
+glowSprite.position.set(0,0.2,-1);
+scene.add(glowSprite);
+
+// ---- label texture (plum + gold, mimicking Appearich's real label) ----
+function makeLabelTexture(){
+  const w = 512, h = 640;
+  const c = document.createElement('canvas');
+  c.width = w; c.height = h;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#3a1330';
+  ctx.fillRect(0,0,w,h);
+  // inner border
+  ctx.strokeStyle = 'rgba(232,205,138,0.85)';
+  ctx.lineWidth = 4;
+  ctx.strokeRect(24,24,w-48,h-48);
+  ctx.strokeStyle = 'rgba(232,205,138,0.5)';
+  ctx.lineWidth = 1.5;
+  ctx.strokeRect(34,34,w-68,h-68);
+
+  ctx.fillStyle = '#e8cd8a';
+  ctx.textAlign = 'center';
+
+  // little bottle glyph
+  ctx.save();
+  ctx.translate(w/2, 130);
+  ctx.beginPath(); ctx.arc(0,-34,14,0,Math.PI*2); ctx.fill();
+  ctx.fillRect(-26,-10,52,70);
+  ctx.restore();
+
+  ctx.font = '600 44px Georgia, serif';
+  ctx.fillText('APPEARICH', w/2, 250);
+
+  ctx.font = 'italic 62px Georgia, serif';
+  ctx.fillText('Sugar', w/2, 340);
+  ctx.fillText('Candy', w/2, 410);
+
+  ctx.font = '20px Georgia, serif';
+  ctx.fillStyle = 'rgba(232,205,138,0.75)';
+  ctx.fillText('E A U   D E   P A R F U M', w/2, 470);
+
+  const tex = new THREE.CanvasTexture(c);
+  tex.anisotropy = 4;
+  return tex;
+}
+
+// ---- bottle group ----
+const bottleGroup = new THREE.Group();
+scene.add(bottleGroup);
+
+// fluted (ribbed) bottle body — matches Appearich's real bottle
+function buildFlutedBottle(){
+  const radialSegments = 96;
+  const heightSegments = 40;
+  const baseRadius = 0.82;
+  const height = 1.9;
+  const ribCount = 24;
+  const ribDepth = 0.045;
+
+  const geo = new THREE.CylinderGeometry(baseRadius, baseRadius*0.97, height, radialSegments, heightSegments, true);
+  const pos = geo.attributes.position;
+  const v = new THREE.Vector3();
+  for(let i=0;i<pos.count;i++){
+    v.fromBufferAttribute(pos, i);
+    const angle = Math.atan2(v.z, v.x);
+    const ribble = Math.cos(angle * ribCount) * ribDepth;
+    // taper the shoulder near the top 15% of height
+    const t = (v.y + height/2) / height; // 0 bottom -> 1 top
+    let shoulder = 1;
+    if(t > 0.82){
+      const s = (t - 0.82) / 0.18;
+      shoulder = 1 - s*0.62;
+    }
+    const r = Math.sqrt(v.x*v.x + v.z*v.z);
+    const newR = (r + ribble) * shoulder;
+    const scale = r > 0.0001 ? newR / r : 1;
+    v.x *= scale; v.z *= scale;
+    pos.setXYZ(i, v.x, v.y, v.z);
+  }
+  geo.computeVertexNormals();
+  return geo;
+}
+
+const glassMat = new THREE.MeshPhysicalMaterial({
+  color: 0xeaeef0, transparent:true, opacity:0.24, roughness:0.05,
+  metalness:0.0, clearcoat:1, clearcoatRoughness:0.06
+});
+const bottleGeo = buildFlutedBottle();
+const bottleMesh = new THREE.Mesh(bottleGeo, glassMat);
+bottleGroup.add(bottleMesh);
+
+// liquid inside (sugar-candy gold)
+const liquidMat = new THREE.MeshPhysicalMaterial({
+  color: 0xe8cd6a, roughness:0.25, metalness:0.05,
+  emissive:0x4a3410, emissiveIntensity:0.3, transparent:true, opacity:0.92
+});
+const liquidGeo = new THREE.CylinderGeometry(0.78, 0.76, 1.35, 48, 1, true);
+const liquidMesh = new THREE.Mesh(liquidGeo, liquidMat);
+liquidMesh.position.y = -0.25;
+bottleGroup.add(liquidMesh);
+const liquidCapGeo = new THREE.CircleGeometry(0.78, 48);
+const liquidCap = new THREE.Mesh(liquidCapGeo, liquidMat);
+liquidCap.rotation.x = -Math.PI/2;
+liquidCap.position.y = 0.425;
+bottleGroup.add(liquidCap);
+
+// label plane
+const labelTex = makeLabelTexture();
+const labelMat = new THREE.MeshStandardMaterial({ map: labelTex, roughness:0.5, metalness:0.1, transparent:true });
+const labelMesh = new THREE.Mesh(new THREE.PlaneGeometry(0.95, 1.19), labelMat);
+labelMesh.position.set(0, -0.05, 0.86);
+bottleGroup.add(labelMesh);
+
+// black cap (matches real bottle)
+const capMat = new THREE.MeshStandardMaterial({ color: 0x141414, metalness:0.4, roughness:0.35 });
+const capGeo = new THREE.CylinderGeometry(0.30, 0.34, 0.5, 32);
+const capMesh = new THREE.Mesh(capGeo, capMat);
+capMesh.position.y = 0.95 + 0.25;
+bottleGroup.add(capMesh);
+// cap ridges (grip lines)
+const ridgeMat = new THREE.MeshStandardMaterial({ color: 0x050505, metalness:0.3, roughness:0.5 });
+for(let i=0;i<6;i++){
+  const ridge = new THREE.Mesh(new THREE.TorusGeometry(0.305, 0.012, 8, 32), ridgeMat);
+  ridge.rotation.x = Math.PI/2;
+  ridge.position.y = 0.72 + i*0.075;
+  bottleGroup.add(ridge);
+}
+
+bottleGroup.position.y = -0.65;
+bottleGroup.scale.setScalar(1.2);
+
+// ---- drag to rotate ----
+let dragging = false, lastX = 0, rotVelocity = 0, userRotation = 0;
+canvas.addEventListener('pointerdown', (e)=>{ dragging = true; lastX = e.clientX; });
+window.addEventListener('pointerup', ()=> dragging = false);
+window.addEventListener('pointermove', (e)=>{
+  if(!dragging) return;
+  const dx = e.clientX - lastX;
+  lastX = e.clientX;
+  rotVelocity = dx * 0.006;
+  userRotation += rotVelocity;
+});
+
+window.addEventListener('resize', ()=>{
+  camera.aspect = window.innerWidth/window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+let autoRotate = 0;
+let scrollRotationOffset = 0;
+function animate(){
+  requestAnimationFrame(animate);
+  autoRotate += 0.0022;
+  if(!dragging) rotVelocity *= 0.92;
+  userRotation += dragging ? 0 : rotVelocity;
+  bottleGroup.rotation.y = autoRotate + userRotation + scrollRotationOffset;
+  renderer.render(scene, camera);
+}
+animate();
+
+/* ---------------- SCROLL CHOREOGRAPHY ---------------- */
+gsap.to({}, {
+  scrollTrigger: {
+    trigger: document.body, start: 'top top', end: 'bottom bottom', scrub: 0.6,
+    onUpdate: (self)=>{
+      scrollRotationOffset = self.progress * Math.PI * 2.2;
+      const p = self.progress;
+      const hue = gsap.utils.interpolate(0.11, 0.85, Math.min(p*1.3,1)); // gold -> plum
+      const col = new THREE.Color().setHSL(hue, 0.55, 0.6);
+      glowLight.color.copy(col);
+      glowLight.intensity = 1.0 + Math.sin(p * Math.PI) * 1.3;
+    }
+  }
+});
+
+gsap.to(bottleGroup.position, {
+  x: 1.4, scrollTrigger: { trigger: '.notes-wrap', start: 'top bottom', end: 'top top', scrub: 0.8 }
+});
+gsap.to(bottleGroup.scale, {
+  x:0.88, y:0.88, z:0.88, scrollTrigger:{ trigger: '.notes-wrap', start:'top bottom', end:'top top', scrub:0.8 }
+});
+gsap.to(bottleGroup.position, {
+  x: 0, scrollTrigger:{ trigger:'.gallery-outer', start:'top bottom', end:'top 40%', scrub:0.8 }
+});
+gsap.to(bottleGroup.scale, {
+  x:1.2, y:1.2, z:1.2, scrollTrigger:{ trigger:'.closing', start:'top bottom', end:'top center', scrub:0.8 }
+});
+gsap.to(bottleMesh.material, {
+  opacity: 0.36, scrollTrigger:{ trigger:'.closing', start:'top bottom', end:'top center', scrub:0.8 }
+});
+
+const notePanels = gsap.utils.toArray('.note-panel');
+notePanels.forEach((panel, i)=>{
+  ScrollTrigger.create({
+    trigger: '.notes-wrap',
+    start: () => `top+=${i * (window.innerHeight)} top`,
+    end: () => `top+=${(i+1) * (window.innerHeight)} top`,
+    onEnter: () => gsap.to(panel, { opacity:1, y:0, duration:0.5, ease:'power2.out' }),
+    onLeave: () => gsap.to(panel, { opacity:0, y:-24, duration:0.4, ease:'power2.in' }),
+    onEnterBack: () => gsap.to(panel, { opacity:1, y:0, duration:0.5, ease:'power2.out' }),
+    onLeaveBack: () => gsap.to(panel, { opacity:0, y:24, duration:0.4, ease:'power2.in' }),
+  });
+});
+
+gsap.utils.toArray('.card').forEach((card)=>{
+  gsap.from(card, {
+    y: 30, opacity:0, duration:0.7, ease:'power2.out',
+    scrollTrigger:{ trigger: card, start:'left 90%', toggleActions:'play none none reverse' }
+  });
+});
+
+gsap.to('.hero .eyebrow, .hero h1, .hero .sub, .hero .drag-hint', {
+  opacity: 0, y: -30, scrollTrigger:{ trigger:'.hero', start:'top top', end:'bottom top', scrub:0.6 }
+});
+
+ScrollTrigger.refresh();
+</script>
+
+</body>
+</html>
