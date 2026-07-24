@@ -1,743 +1,339 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>APPEARICH — Sugar Candy</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=Marcellus&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
-<style>
-  :root{
-    --ink:#0b0906;
-    --ink-2:#141009;
-    --wine:#3d0f14;
-    --wine-light:#63181f;
-    --gold:#c9a35d;
-    --gold-bright:#eccf8f;
-    --cream:#f3ead9;
-    --cream-dim:#cfc3ac;
-  }
-  *{box-sizing:border-box; margin:0; padding:0;}
-  html{scroll-behavior:smooth;}
-  body{
-    background:var(--ink);
-    color:var(--cream);
-    font-family:'Jost', sans-serif;
-    font-weight:300;
-    overflow-x:hidden;
-  }
-  ::selection{ background:var(--gold); color:var(--ink); }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Appearich - Luxury Perfume</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Playfair Display', Georgia, serif;
+        }
 
-  h1,h2,h3, .serif{ font-family:'Cormorant Garamond', serif; font-weight:400; }
-  .label-face{ font-family:'Marcellus', serif; }
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #0d0c0a;
+            color: #f3ece0;
+        }
 
-  .eyebrow{
-    font-family:'Marcellus', serif;
-    letter-spacing:0.35em;
-    text-transform:uppercase;
-    font-size:0.72rem;
-    color:var(--gold);
-  }
+        #webgl-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
 
-  a{ color:inherit; }
-  img{ max-width:100%; display:block; }
+        /* Overlay UI Elements */
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 3rem;
+        }
 
-  .noise{
-    position:fixed; inset:0; pointer-events:none; z-index:2;
-    opacity:0.035; mix-blend-mode:overlay;
-    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
-  /* ---------- NAV ---------- */
-  nav{
-    position:fixed; top:0; left:0; right:0; z-index:50;
-    display:flex; align-items:center; justify-content:space-between;
-    padding:1.6rem clamp(1.2rem, 5vw, 3.5rem);
-    mix-blend-mode:difference;
-  }
-  .brand{
-    font-family:'Cormorant Garamond', serif;
-    font-size:1.25rem;
-    letter-spacing:0.28em;
-    color:var(--cream);
-  }
-  .brand span{ color:var(--gold); }
-  .navlinks{ display:flex; gap:2.4rem; font-size:0.78rem; letter-spacing:0.18em; text-transform:uppercase; }
-  .navlinks a{ text-decoration:none; opacity:0.8; transition:opacity .3s; }
-  .navlinks a:hover{ opacity:1; }
-  @media (max-width:720px){ .navlinks{ display:none; } }
+        .logo {
+            font-size: 2rem;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            color: #dfb76c;
+            font-weight: 700;
+        }
 
-  /* ---------- HERO ---------- */
-  .hero{
-    position:relative;
-    height:100svh;
-    width:100%;
-    display:flex; align-items:center; justify-content:center;
-    background:
-      radial-gradient(ellipse 60% 50% at 50% 38%, rgba(99,24,31,0.55), transparent 70%),
-      radial-gradient(ellipse 90% 70% at 50% 100%, rgba(30,10,6,0.9), transparent 70%),
-      var(--ink);
-    overflow:hidden;
-  }
-  #bottle-canvas{ position:absolute; inset:0; width:100%; height:100%; touch-action:none; cursor:grab; }
-  #bottle-canvas:active{ cursor:grabbing; }
+        .hero-title {
+            position: absolute;
+            top: 50%;
+            left: 10%;
+            transform: translateY(-50%);
+            opacity: 0; /* Animated by GSAP */
+        }
 
-  .hero-copy{
-    position:relative; z-index:5;
-    text-align:center;
-    pointer-events:none;
-    padding-top:2rem;
-  }
-  .hero-copy .eyebrow{ margin-bottom:1.1rem; }
-  .hero-copy h1{
-    font-size:clamp(2.6rem, 7vw, 5.4rem);
-    line-height:1.02;
-    letter-spacing:0.01em;
-    color:var(--cream);
-    text-shadow:0 0 60px rgba(0,0,0,0.6);
-  }
-  .hero-copy h1 em{ font-style:italic; color:var(--gold-bright); }
-  .hero-copy p.sub{
-    margin-top:1.2rem;
-    font-size:1rem;
-    color:var(--cream-dim);
-    letter-spacing:0.03em;
-  }
+        .hero-title h1 {
+            font-size: 4rem;
+            font-weight: 300;
+            line-height: 1.1;
+            margin-bottom: 1rem;
+        }
 
-  .drag-hint{
-    position:absolute; bottom:8.5rem; left:50%; transform:translateX(-50%);
-    display:flex; align-items:center; gap:0.6rem;
-    font-size:0.7rem; letter-spacing:0.22em; text-transform:uppercase;
-    color:var(--cream-dim); z-index:6;
-    opacity:0; animation:fadein 1.4s ease 1.4s forwards;
-  }
-  .drag-hint .ring{
-    width:22px; height:22px; border:1px solid var(--gold); border-radius:50%;
-    position:relative;
-  }
-  .drag-hint .ring::after{
-    content:''; position:absolute; inset:5px; border:1px solid var(--gold); border-radius:50%; opacity:0.4;
-  }
-  @keyframes fadein{ to{ opacity:1; } }
+        .hero-title p {
+            font-size: 1.1rem;
+            color: #b3a394;
+            max-width: 350px;
+            letter-spacing: 0.05em;
+        }
 
-  .scroll-cue{
-    position:absolute; bottom:2.6rem; left:50%; transform:translateX(-50%);
-    z-index:6; display:flex; flex-direction:column; align-items:center; gap:0.5rem;
-    color:var(--cream-dim);
-  }
-  .scroll-cue .line{ width:1px; height:38px; background:linear-gradient(var(--gold), transparent); animation:pulse 2.2s ease-in-out infinite; }
-  @keyframes pulse{ 0%,100%{ opacity:0.3; } 50%{ opacity:1; } }
+        .controls {
+            pointer-events: auto;
+            align-self: center;
+            margin-bottom: 2rem;
+        }
 
-  /* ---------- NOTES (horizontal pinned) ---------- */
-  .notes-wrap{ position:relative; background:var(--ink); }
-  .notes-pin{
-    height:100vh; width:100%;
-    display:flex; align-items:center; overflow:hidden;
-    position:relative;
-  }
-  .notes-track{
-    display:flex; height:100%; align-items:center;
-    will-change:transform;
-  }
-  .note-panel{
-    flex:0 0 100vw; height:100%;
-    display:flex; flex-direction:column; align-items:center; justify-content:center;
-    text-align:center; position:relative;
-    padding:0 6vw;
-  }
-  .note-panel .index{
-    font-family:'Marcellus', serif; font-size:0.75rem; letter-spacing:0.3em; color:var(--gold);
-    margin-bottom:1.4rem;
-  }
-  .note-panel h2{
-    font-size:clamp(2.4rem, 8vw, 6rem);
-    color:var(--cream);
-  }
-  .note-panel p{
-    margin-top:1.3rem; max-width:32ch; color:var(--cream-dim); font-size:1rem; line-height:1.6;
-  }
-  .note-orb{
-    position:absolute; width:46vw; height:46vw; max-width:640px; max-height:640px;
-    border-radius:50%; z-index:0; filter:blur(10px);
-    opacity:0.5;
-  }
-  .note-panel .content{ position:relative; z-index:2; }
+        .btn-replay {
+            background: rgba(223, 183, 108, 0.15);
+            border: 1px solid #dfb76c;
+            color: #dfb76c;
+            padding: 12px 28px;
+            font-size: 0.9rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
 
-  .notes-intro{
-    position:absolute; top:3rem; left:0; right:0; text-align:center; z-index:3;
-  }
+        .btn-replay:hover {
+            background: #dfb76c;
+            color: #0d0c0a;
+            box-shadow: 0 0 20px rgba(223, 183, 108, 0.4);
+        }
+    </style>
 
-  /* ---------- CRAFT ---------- */
-  .craft{
-    position:relative;
-    padding:min(20vh,10rem) clamp(1.5rem,6vw,6rem);
-    background:
-      radial-gradient(ellipse 70% 60% at 15% 20%, rgba(61,15,20,0.5), transparent 60%),
-      radial-gradient(ellipse 60% 60% at 90% 80%, rgba(61,15,20,0.35), transparent 60%),
-      var(--ink);
-  }
-  .craft-grid{
-    display:grid; grid-template-columns:1fr 1fr; gap:5rem; align-items:center; max-width:1200px; margin:0 auto;
-  }
-  @media (max-width:860px){ .craft-grid{ grid-template-columns:1fr; gap:2.5rem; } }
-  .craft-grid h2{ font-size:clamp(2rem,4.5vw,3.2rem); line-height:1.15; }
-  .craft-grid h2 em{ color:var(--gold-bright); font-style:italic; }
-  .craft-list{ margin-top:2.2rem; display:flex; flex-direction:column; gap:1.5rem; }
-  .craft-item{ display:flex; gap:1.2rem; align-items:baseline; border-top:1px solid rgba(201,163,93,0.25); padding-top:1.2rem; }
-  .craft-item .num{ font-family:'Marcellus',serif; color:var(--gold); font-size:0.85rem; }
-  .craft-item h3{ font-size:1.15rem; font-weight:500; color:var(--cream); margin-bottom:0.3rem; font-family:'Jost',sans-serif;}
-  .craft-item p{ color:var(--cream-dim); font-size:0.92rem; line-height:1.55; }
-
-  .craft-visual{
-    position:relative; aspect-ratio:3/4; border-radius:2px; overflow:hidden;
-    background:linear-gradient(160deg, var(--wine-light), var(--ink) 70%);
-    display:flex; align-items:center; justify-content:center;
-  }
-  .craft-visual::before{
-    content:''; position:absolute; inset:0;
-    background:radial-gradient(circle at 50% 40%, rgba(236,207,143,0.25), transparent 60%);
-  }
-  .craft-visual svg{ width:38%; position:relative; z-index:2; filter:drop-shadow(0 20px 40px rgba(0,0,0,0.6)); }
-
-  /* ---------- PACKAGING ---------- */
-  .packaging{
-    position:relative; padding:min(18vh,9rem) clamp(1.5rem,6vw,6rem);
-    background:var(--ink-2);
-    display:grid; grid-template-columns:1.1fr 0.9fr; gap:4rem; align-items:center;
-    overflow:hidden;
-  }
-  @media (max-width:860px){ .packaging{ grid-template-columns:1fr; } }
-  .packaging-copy .eyebrow{ margin-bottom:1rem; }
-  .packaging-copy h2{ font-size:clamp(2.1rem,4.5vw,3.4rem); line-height:1.1; margin-bottom:1.4rem;}
-  .packaging-copy p{ color:var(--cream-dim); max-width:44ch; line-height:1.7; font-size:0.98rem; }
-  .packaging-specs{ margin-top:2rem; display:flex; gap:2.5rem; flex-wrap:wrap; }
-  .packaging-specs div{ font-size:0.78rem; letter-spacing:0.08em; color:var(--cream-dim); }
-  .packaging-specs strong{ display:block; font-family:'Cormorant Garamond',serif; font-size:1.5rem; color:var(--gold-bright); font-weight:500; }
-
-  .packaging-photo{ position:relative; }
-  .packaging-photo img{
-    border-radius:3px;
-    box-shadow:0 40px 90px rgba(0,0,0,0.55);
-    transform:translateY(0);
-  }
-  .packaging-photo .glow{
-    position:absolute; inset:-15%; z-index:-1;
-    background:radial-gradient(circle at 50% 55%, rgba(236,207,143,0.28), transparent 65%);
-    filter:blur(30px);
-  }
-
-  /* ---------- CTA ---------- */
-  .cta{
-    position:relative; min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center;
-    text-align:center; padding:6rem 1.5rem;
-    background:
-      radial-gradient(ellipse 70% 55% at 50% 30%, rgba(99,24,31,0.6), transparent 65%),
-      var(--ink);
-    overflow:hidden;
-  }
-  .cta .eyebrow{ margin-bottom:1.2rem; }
-  .cta h2{ font-size:clamp(2.6rem,7vw,5rem); max-width:16ch; line-height:1.05; }
-  .cta h2 em{ font-style:italic; color:var(--gold-bright); }
-  .cta .price{ margin-top:1.6rem; font-family:'Cormorant Garamond',serif; font-size:1.6rem; color:var(--cream-dim); }
-  .cta .price strong{ color:var(--gold-bright); font-weight:500; }
-  .buy-btn{
-    margin-top:2.6rem;
-    display:inline-flex; align-items:center; gap:0.8rem;
-    padding:1.05rem 2.6rem;
-    border:1px solid var(--gold);
-    color:var(--cream);
-    text-decoration:none;
-    font-size:0.78rem; letter-spacing:0.22em; text-transform:uppercase;
-    background:transparent;
-    position:relative; overflow:hidden;
-    transition:color .4s ease;
-  }
-  .buy-btn span{ position:relative; z-index:2; }
-  .buy-btn::before{
-    content:''; position:absolute; inset:0; background:var(--gold);
-    transform:translateX(-101%); transition:transform .45s cubic-bezier(.7,0,.2,1); z-index:1;
-  }
-  .buy-btn:hover{ color:var(--ink); }
-  .buy-btn:hover::before{ transform:translateX(0); }
-
-  footer{
-    padding:2.5rem 1.5rem 3rem; text-align:center; color:var(--cream-dim); font-size:0.72rem; letter-spacing:0.15em; text-transform:uppercase;
-    background:var(--ink); border-top:1px solid rgba(201,163,93,0.15);
-  }
-
-  #particles-canvas{ position:absolute; inset:0; z-index:1; pointer-events:none; }
-
-  .reveal{ opacity:0; transform:translateY(28px); }
-</style>
+    <!-- Three.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- GSAP for Smooth Cinematic Timelines -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 </head>
 <body>
 
-<div class="noise"></div>
+    <div id="webgl-container"></div>
 
-<nav>
-  <div class="brand">APPEARICH <span>·</span> PERFUMES</div>
-  <div class="navlinks">
-    <a href="#notes">Notes</a>
-    <a href="#craft">Craft</a>
-    <a href="#packaging">Packaging</a>
-    <a href="#buy">Acquire</a>
-  </div>
-</nav>
+    <div class="overlay">
+        <header>
+            <div class="logo">APPEARICH</div>
+        </header>
 
-<!-- HERO -->
-<section class="hero" id="hero">
-  <canvas id="particles-canvas"></canvas>
-  <canvas id="bottle-canvas"></canvas>
-  <div class="hero-copy">
-    <div class="eyebrow">Appearich — Extrait de Parfum</div>
-    <h1>Sugar&nbsp;<em>Candy</em></h1>
-    <p class="sub">A gourmand cut with restraint. Spun sugar,<br class="br-mobile"> warm musk, and a quiet burn of vanilla.</p>
-  </div>
-  <div class="drag-hint"><span class="ring"></span> Drag to rotate</div>
-  <div class="scroll-cue"><span class="line"></span><span style="font-size:0.65rem;letter-spacing:0.2em;">SCROLL</span></div>
-</section>
+        <div class="hero-title" id="hero-text">
+            <h1>Exotic.<br>Pure.<br>Unveiled.</h1>
+            <p>Infused with tropical golden oil. Experience the unboxing of nature's finest essence.</p>
+        </div>
 
-<!-- NOTES -->
-<section class="notes-wrap" id="notes">
-  <div class="notes-pin">
-    <div class="notes-track" id="notesTrack">
-      <div class="note-panel">
-        <div class="note-orb" style="background:radial-gradient(circle, rgba(236,207,143,0.5), transparent 70%); top:10%; left:5%;"></div>
-        <div class="content">
-          <div class="index">01 — Top</div>
-          <h2>Pink Sugar<br>&amp; Bergamot</h2>
-          <p>The first breath: crushed sugar crystal, a citrus flicker of bergamot, and a whisper of red berry that dissolves fast.</p>
+        <div class="controls">
+            <button class="btn-replay" onclick="playBreakSequence()">Replay Experience</button>
         </div>
-      </div>
-      <div class="note-panel">
-        <div class="note-orb" style="background:radial-gradient(circle, rgba(99,24,31,0.7), transparent 70%); bottom:5%; right:10%;"></div>
-        <div class="content">
-          <div class="index">02 — Heart</div>
-          <h2>Vanilla Orchid<br>&amp; Caramel</h2>
-          <p>Where the scent settles. Warm caramel folds into vanilla orchid — soft, rounded, faintly smoky at the edges.</p>
-        </div>
-      </div>
-      <div class="note-panel">
-        <div class="note-orb" style="background:radial-gradient(circle, rgba(236,207,143,0.35), transparent 70%); top:15%; right:15%;"></div>
-        <div class="content">
-          <div class="index">03 — Base</div>
-          <h2>Tonka Bean<br>&amp; Musk</h2>
-          <p>The part that lingers on skin for hours. Tonka bean, sandalwood, and clean musk hold the sweetness down.</p>
-        </div>
-      </div>
     </div>
-  </div>
-</section>
 
-<!-- CRAFT -->
-<section class="craft" id="craft">
-  <div class="craft-grid">
-    <div>
-      <div class="eyebrow reveal">The Extrait</div>
-      <h2 class="reveal" style="margin-top:0.8rem;">Concentration<br>over <em>compromise</em></h2>
-      <div class="craft-list">
-        <div class="craft-item reveal">
-          <div class="num">01</div>
-          <div><h3>28% Oil Concentration</h3><p>An extrait strength, not a spray-and-fade eau de toilette. Built to last a full day on skin.</p></div>
-        </div>
-        <div class="craft-item reveal">
-          <div class="num">02</div>
-          <div><h3>Cold-Blended, Small Batch</h3><p>Every batch rested for three weeks before bottling, so the notes marry properly.</p></div>
-        </div>
-        <div class="craft-item reveal">
-          <div class="num">03</div>
-          <div><h3>Ribbed Flacon, Hand-Filled</h3><p>The glass is heavier than it needs to be. That's deliberate — it should feel considered in the hand.</p></div>
-        </div>
-      </div>
-    </div>
-    <div class="craft-visual reveal">
-      <svg viewBox="0 0 100 140" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect x="10" y="8" width="10" height="6" rx="2" stroke="#eccf8f" stroke-width="1.2"/>
-        <path d="M8 18 C8 14 12 12 15 12 C18 12 22 14 22 18 L26 40 C27 44 27 100 24 120 C23 128 7 128 6 120 C3 100 3 44 4 40 Z" stroke="#eccf8f" stroke-width="1.2"/>
-        <line x1="4" y1="55" x2="26" y2="55" stroke="#eccf8f" stroke-width="0.6" opacity="0.5"/>
-        <line x1="4" y1="95" x2="26" y2="95" stroke="#eccf8f" stroke-width="0.6" opacity="0.5"/>
-      </svg>
-    </div>
-  </div>
-</section>
+    <script>
+        // --- 1. SCENE SETUP ---
+        const container = document.getElementById('webgl-container');
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x0d0c0a, 0.05);
 
-<!-- PACKAGING -->
-<section class="packaging" id="packaging">
-  <div class="packaging-copy">
-    <div class="eyebrow reveal">Presentation</div>
-    <h2 class="reveal">Dressed in matte<br>black &amp; foil gold</h2>
-    <p class="reveal">Each flacon ships inside a matte black cylinder, foil-stamped and lined in tissue. The bottle itself carries a deep wine label, so what sits on your shelf reads like an heirloom, not a drugstore spray.</p>
-    <div class="packaging-specs reveal">
-      <div><strong>60ml</strong>Bottle volume</div>
-      <div><strong>28%</strong>Oil concentration</div>
-      <div><strong>8–10h</strong>Wear time</div>
-    </div>
-  </div>
-  <div class="packaging-photo reveal">
-    <div class="glow"></div>
-    <img src="appearich-bottle-photo.png" alt="Appearich Sugar Candy perfume bottle and packaging box" />
-  </div>
-</section>
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+        camera.position.set(0, 3, 8);
 
-<!-- CTA -->
-<section class="cta" id="buy">
-  <canvas id="cta-particles" style="position:absolute; inset:0; z-index:0;"></canvas>
-  <div style="position:relative; z-index:2;">
-    <div class="eyebrow">Sugar Candy — 60ml Extrait</div>
-    <h2>Wear the scent<br>you keep <em>coming back to</em></h2>
-    <div class="price">$<strong>89</strong> · free shipping</div>
-    <a href="#" class="buy-btn"><span>Add to Bag</span></a>
-  </div>
-</section>
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        container.appendChild(renderer.domElement);
 
-<footer>Appearich Perfumes — Handmade in small batches</footer>
+        // --- 2. LIGHTING ---
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+        scene.add(ambientLight);
 
-<script async src="https://unpkg.com/es-module-shims@1.8.0/dist/es-module-shims.js"></script>
-<script type="importmap">
-{
-  "imports": {
-    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
-  }
-}
-</script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+        const spotLight = new THREE.SpotLight(0xffdf9e, 3);
+        spotLight.position.set(5, 10, 5);
+        spotLight.castShadow = true;
+        scene.add(spotLight);
 
-<script type="module">
-import * as THREE from 'three';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        // Floor reflective shadow plane
+        const floorGeo = new THREE.PlaneGeometry(30, 30);
+        const floorMat = new THREE.MeshStandardMaterial({ color: 0x0a0908, roughness: 0.6, metalness: 0.2 });
+        const floor = new THREE.Mesh(floorGeo, floorMat);
+        floor.rotation.x = -Math.PI / 2;
+        floor.position.y = -1;
+        floor.receiveShadow = true;
+        scene.add(floor);
 
-gsap.registerPlugin(ScrollTrigger);
+        // --- 3. OBJECTS & YOUR CUSTOM BOTTLE IMAGE ---
 
-/* ============ REVEAL ANIMATIONS ============ */
-gsap.utils.toArray('.reveal').forEach((el)=>{
-  gsap.to(el, {
-    opacity:1, y:0, duration:1.1, ease:'power3.out',
-    scrollTrigger:{ trigger:el, start:'top 85%' }
-  });
-});
+        // Coconut (Falling Object)
+        const coconutGroup = new THREE.Group();
+        const coconutGeo = new THREE.SphereGeometry(1.2, 32, 32);
+        const coconutMat = new THREE.MeshStandardMaterial({ color: 0x3d2314, roughness: 0.9 });
+        const coconut = new THREE.Mesh(coconutGeo, coconutMat);
+        coconut.castShadow = true;
+        coconutGroup.add(coconut);
+        scene.add(coconutGroup);
 
-/* ============ HORIZONTAL NOTES PIN ============ */
-const track = document.getElementById('notesTrack');
-function setupNotesScroll(){
-  const panels = gsap.utils.toArray('.note-panel');
-  const totalWidth = () => track.scrollWidth - window.innerWidth;
-  ScrollTrigger.create({
-    trigger:'.notes-wrap',
-    start:'top top',
-    end:()=> '+=' + (totalWidth() + window.innerHeight),
-    pin:true,
-    scrub:1,
-    onUpdate:(self)=>{
-      gsap.set(track, { x: -self.progress * totalWidth() });
-    }
-  });
-}
-window.addEventListener('load', ()=> setTimeout(setupNotesScroll, 50));
+        // --- APPEARICH BOTTLE IMAGE PLANE ---
+        const perfumeGroup = new THREE.Group();
 
-/* ============ AMBIENT SUGAR PARTICLES (2D canvas, hero + cta) ============ */
-function makeParticleField(canvasId, count, colorA, colorB){
-  const canvas = document.getElementById(canvasId);
-  const ctx = canvas.getContext('2d');
-  let w,h,parts;
-  function resize(){
-    w = canvas.width = canvas.offsetWidth * devicePixelRatio;
-    h = canvas.height = canvas.offsetHeight * devicePixelRatio;
-  }
-  function init(){
-    resize();
-    parts = Array.from({length:count}, ()=>({
-      x:Math.random()*w, y:Math.random()*h,
-      r:(Math.random()*1.6+0.4)*devicePixelRatio,
-      spd:(Math.random()*0.25+0.06)*devicePixelRatio,
-      drift:Math.random()*0.6-0.3,
-      c: Math.random()>0.5?colorA:colorB,
-      a: Math.random()*0.5+0.15
-    }));
-  }
-  function tick(){
-    ctx.clearRect(0,0,w,h);
-    parts.forEach(p=>{
-      p.y -= p.spd; p.x += Math.sin(p.y*0.01)*p.drift*0.3;
-      if(p.y < -10){ p.y = h+10; p.x = Math.random()*w; }
-      ctx.beginPath();
-      ctx.fillStyle = p.c;
-      ctx.globalAlpha = p.a;
-      ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
-      ctx.fill();
-    });
-    ctx.globalAlpha = 1;
-    requestAnimationFrame(tick);
-  }
-  init();
-  window.addEventListener('resize', init);
-  tick();
-}
-makeParticleField('particles-canvas', 70, 'rgba(236,207,143,0.9)', 'rgba(243,234,217,0.7)');
-makeParticleField('cta-particles', 50, 'rgba(236,207,143,0.7)', 'rgba(99,24,31,0.6)');
+        // Load your image texture
+        const textureLoader = new THREE.TextureLoader();
+        
+        // REPLACE THIS URL with your image path (e.g., 'appearich-bottle.png')
+        const bottleTexture = textureLoader.load('appearich-bottle.png', () => {
+            renderer.render(scene, camera);
+        });
 
-/* ============ 3D BOTTLE ============ */
-const heroSection = document.getElementById('hero');
-const canvas = document.getElementById('bottle-canvas');
-const renderer = new THREE.WebGLRenderer({ canvas, antialias:true, alpha:true });
-renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
-renderer.outputColorSpace = THREE.SRGBColorSpace;
+        // 3D Plane for the image (Width: 2, Height: 3.5 — adjust according to image aspect ratio)
+        const bottleGeo = new THREE.PlaneGeometry(2, 3.5);
+        const bottleMat = new THREE.MeshBasicMaterial({
+            map: bottleTexture,
+            transparent: true,
+            alphaTest: 0.1,
+            side: THREE.DoubleSide
+        });
+        
+        const bottleMesh = new THREE.Mesh(bottleGeo, bottleMat);
+        perfumeGroup.add(bottleMesh);
 
-const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(32, heroSection.clientWidth/heroSection.clientHeight, 0.1, 100);
-camera.position.set(0, 0.15, 6.4);
+        perfumeGroup.position.set(0, -1, 0); 
+        perfumeGroup.scale.set(0, 0, 0);
+        scene.add(perfumeGroup);
 
-function resizeRenderer(){
-  const wdt = heroSection.clientWidth, hgt = heroSection.clientHeight;
-  renderer.setSize(wdt, hgt);
-  camera.aspect = wdt/hgt;
-  camera.updateProjectionMatrix();
-}
-resizeRenderer();
-window.addEventListener('resize', resizeRenderer);
+        // --- GOLDEN SPARKLE PARTICLES ---
+        const particleCount = 120;
+        const particleGeo = new THREE.BufferGeometry();
+        const particlePositions = new Float32Array(particleCount * 3);
+        const particleVelocities = [];
 
-/* --- lighting --- */
-const ambient = new THREE.AmbientLight(0x554433, 0.55);
-scene.add(ambient);
+        for (let i = 0; i < particleCount; i++) {
+            particlePositions[i * 3] = 0;
+            particlePositions[i * 3 + 1] = -1; 
+            particlePositions[i * 3 + 2] = 0;
 
-const keyLight = new THREE.DirectionalLight(0xfff2d8, 1.1);
-keyLight.position.set(3, 4, 5);
-scene.add(keyLight);
+            particleVelocities.push({
+                x: (Math.random() - 0.5) * 0.3,
+                y: Math.random() * 0.25 + 0.1,
+                z: (Math.random() - 0.5) * 0.3
+            });
+        }
 
-const rimLight = new THREE.DirectionalLight(0xc9a35d, 0.7);
-rimLight.position.set(-4, 2, -3);
-scene.add(rimLight);
+        particleGeo.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
+        const particleMat = new THREE.PointsMaterial({
+            color: 0xffdf80,
+            size: 0.08,
+            transparent: true,
+            opacity: 0
+        });
+        const splashParticles = new THREE.Points(particleGeo, particleMat);
+        scene.add(splashParticles);
 
-const glowLight = new THREE.PointLight(0xe8b23d, 4, 12, 2);
-glowLight.position.set(0, -0.6, 2.4);
-scene.add(glowLight);
+        // --- 4. ANIMATION SEQUENCE ---
+        let timeline;
 
-/* --- environment for reflections --- */
-const pmrem = new THREE.PMREMGenerator(renderer);
-const envScene = new THREE.Scene();
-envScene.background = new THREE.Color(0x150d09);
-const envLightA = new THREE.PointLight(0xffe3b0, 40, 20); envLightA.position.set(3,4,3); envScene.add(envLightA);
-const envLightB = new THREE.PointLight(0x63181f, 25, 20); envLightB.position.set(-4,-2,-2); envScene.add(envLightB);
-const envTex = pmrem.fromScene(envScene, 0.04).texture;
-scene.environment = envTex;
+        function playBreakSequence() {
+            if (timeline) timeline.kill();
 
-/* --- label texture (canvas) --- */
-function buildLabelTexture(){
-  const c = document.createElement('canvas');
-  c.width = 512; c.height = 640;
-  const ctx = c.getContext('2d');
-  ctx.fillStyle = 'rgba(0,0,0,0)';
-  ctx.clearRect(0,0,c.width,c.height);
+            // Reset States
+            coconutGroup.position.set(0, 7, 0);
+            coconutGroup.scale.set(1, 1, 1);
+            
+            perfumeGroup.scale.set(0, 0, 0);
+            perfumeGroup.position.set(0, 0, 0);
+            perfumeGroup.rotation.y = 0;
 
-  const pad = 40;
-  // wine plate
-  ctx.fillStyle = '#3d0f14';
-  roundRect(ctx, pad, 110, c.width-pad*2, 420, 6);
-  ctx.fill();
+            particleMat.opacity = 0;
+            
+            gsap.to('#hero-text', { opacity: 0, duration: 0.5 });
 
-  // gold border
-  ctx.strokeStyle = '#c9a35d';
-  ctx.lineWidth = 3;
-  roundRect(ctx, pad+10, 120, c.width-pad*2-20, 400, 4);
-  ctx.stroke();
-  ctx.lineWidth = 1;
-  roundRect(ctx, pad+18, 128, c.width-pad*2-36, 384, 3);
-  ctx.stroke();
+            timeline = gsap.timeline();
 
-  ctx.textAlign='center';
-  ctx.fillStyle = '#e8c77e';
+            // 1. Coconut Falls Fast
+            timeline.to(coconutGroup.position, {
+                y: -0.2,
+                duration: 0.9,
+                ease: "power3.in",
+                onComplete: triggerImpact
+            })
+            // 2. Coconut Shatters Outward
+            .to(coconutGroup.scale, {
+                x: 2.5,
+                y: 0.05,
+                z: 2.5,
+                duration: 0.15,
+                ease: "power4.out"
+            })
+            .to(coconutGroup.scale, {
+                x: 0, y: 0, z: 0, duration: 0.1
+            })
+            // 3. Your Appearich Bottle Image Emerges
+            .to(perfumeGroup.scale, {
+                x: 1, y: 1, z: 1,
+                duration: 1.2,
+                ease: "back.out(1.7)"
+            }, "-=0.1")
+            .to(perfumeGroup.position, {
+                y: 0.8,
+                duration: 1.2,
+                ease: "power2.out"
+            }, "<")
+            // 4. Subtle Floating Animation & Reveal Text
+            .to(perfumeGroup.position, {
+                y: 1.0,
+                duration: 2,
+                repeat: -1,
+                yoyo: true,
+                ease: "sine.inOut"
+            })
+            .to('#hero-text', {
+                opacity: 1,
+                x: 20,
+                duration: 1,
+                ease: "power2.out"
+            }, "-=2");
+        }
 
-  // icon glyph (bottle silhouette)
-  ctx.save();
-  ctx.translate(c.width/2, 190);
-  ctx.strokeStyle = '#e8c77e'; ctx.lineWidth = 3;
-  ctx.beginPath();
-  ctx.roundRect(-10, -34, 20, 14, 3); ctx.stroke();
-  ctx.beginPath();
-  ctx.moveTo(-16,-18);
-  ctx.bezierCurveTo(-16,-8,-20,0,-20,20);
-  ctx.lineTo(-18,44);
-  ctx.quadraticCurveTo(0,52,18,44);
-  ctx.lineTo(20,20);
-  ctx.bezierCurveTo(20,0,16,-8,16,-18);
-  ctx.closePath();
-  ctx.stroke();
-  ctx.restore();
+        function triggerImpact() {
+            particleMat.opacity = 1;
+            const positions = splashParticles.geometry.attributes.position.array;
 
-  ctx.font = '600 44px Marcellus, serif';
-  ctx.fillText('APPEARICH', c.width/2, 275);
+            for (let i = 0; i < particleCount; i++) {
+                positions[i * 3] = 0;
+                positions[i * 3 + 1] = -0.8;
+                positions[i * 3 + 2] = 0;
+            }
+            splashParticles.geometry.attributes.position.needsUpdate = true;
 
-  ctx.font = 'italic 500 58px "Cormorant Garamond", serif';
-  ctx.fillText('Sugar', c.width/2, 355);
-  ctx.fillText('Candy', c.width/2, 415);
+            gsap.to(particleMat, { opacity: 0, duration: 1.2, delay: 0.2 });
+        }
 
-  ctx.strokeStyle = 'rgba(232,199,126,0.6)';
-  ctx.lineWidth = 1;
-  ctx.beginPath(); ctx.moveTo(c.width/2-70, 440); ctx.lineTo(c.width/2+70,440); ctx.stroke();
+        // --- 5. RENDER LOOP ---
+        function animate() {
+            requestAnimationFrame(animate);
 
-  ctx.font = '500 17px Marcellus, serif';
-  ctx.fillStyle = '#d9bd85';
-  ctx.save();
-  ctx.scale(1,1);
-  ctx.fillText('E A U   D E   P A R F U M', c.width/2, 470);
-  ctx.restore();
+            if (particleMat.opacity > 0) {
+                const positions = splashParticles.geometry.attributes.position.array;
+                for (let i = 0; i < particleCount; i++) {
+                    positions[i * 3] += particleVelocities[i].x;
+                    positions[i * 3 + 1] += particleVelocities[i].y;
+                    positions[i * 3 + 2] += particleVelocities[i].z;
+                }
+                splashParticles.geometry.attributes.position.needsUpdate = true;
+            }
 
-  const tex = new THREE.CanvasTexture(c);
-  tex.colorSpace = THREE.SRGBColorSpace;
-  tex.anisotropy = 8;
-  return tex;
-}
-function roundRect(ctx,x,y,w,h,r){
-  ctx.beginPath();
-  ctx.moveTo(x+r,y);
-  ctx.arcTo(x+w,y,x+w,y+h,r);
-  ctx.arcTo(x+w,y+h,x,y+h,r);
-  ctx.arcTo(x,y+h,x,y,r);
-  ctx.arcTo(x,y,x+w,y,r);
-  ctx.closePath();
-}
+            renderer.render(scene, camera);
+        }
 
-/* --- ribbed glass bump texture --- */
-function buildRibTexture(){
-  const c = document.createElement('canvas');
-  c.width = 256; c.height = 256;
-  const ctx = c.getContext('2d');
-  ctx.fillStyle = '#808080';
-  ctx.fillRect(0,0,c.width,c.height);
-  const ribs = 40;
-  for(let i=0;i<ribs;i++){
-    const x = (i/ribs)*c.width;
-    const grad = ctx.createLinearGradient(x,0,x+c.width/ribs,0);
-    grad.addColorStop(0,'#6a6a6a');
-    grad.addColorStop(0.5,'#c8c8c8');
-    grad.addColorStop(1,'#6a6a6a');
-    ctx.fillStyle = grad;
-    ctx.fillRect(x,0,c.width/ribs,c.height);
-  }
-  const tex = new THREE.CanvasTexture(c);
-  tex.wrapS = THREE.RepeatWrapping; tex.wrapT = THREE.RepeatWrapping;
-  tex.repeat.set(1,1);
-  return tex;
-}
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
 
-const bottleGroup = new THREE.Group();
-scene.add(bottleGroup);
-
-const ribBump = buildRibTexture();
-
-/* body */
-const bodyGeo = new THREE.CylinderGeometry(1.02, 0.96, 2.5, 48, 6);
-const glassMat = new THREE.MeshPhysicalMaterial({
-  color: 0xffffff,
-  metalness:0,
-  roughness:0.08,
-  transmission:0.94,
-  thickness:0.6,
-  ior:1.5,
-  bumpMap: ribBump,
-  bumpScale:0.012,
-  clearcoat:0.6,
-  clearcoatRoughness:0.2,
-  envMapIntensity:1.2,
-});
-const body = new THREE.Mesh(bodyGeo, glassMat);
-body.position.y = 0.1;
-bottleGroup.add(body);
-
-/* liquid */
-const liquidGeo = new THREE.CylinderGeometry(0.86, 0.82, 1.85, 48);
-const liquidMat = new THREE.MeshPhysicalMaterial({
-  color: 0xf2c14e,
-  transmission:0.55,
-  roughness:0.15,
-  thickness:1,
-  ior:1.35,
-  emissive:0xe8a020,
-  emissiveIntensity:0.12,
-});
-const liquid = new THREE.Mesh(liquidGeo, liquidMat);
-liquid.position.y = -0.28;
-bottleGroup.add(liquid);
-
-/* shoulder taper */
-const shoulderGeo = new THREE.CylinderGeometry(0.42, 1.0, 0.5, 48);
-const shoulder = new THREE.Mesh(shoulderGeo, glassMat);
-shoulder.position.y = 1.6;
-bottleGroup.add(shoulder);
-
-/* neck */
-const neckGeo = new THREE.CylinderGeometry(0.4, 0.42, 0.4, 32);
-const neck = new THREE.Mesh(neckGeo, glassMat);
-neck.position.y = 2.0;
-bottleGroup.add(neck);
-
-/* cap */
-const capMat = new THREE.MeshPhysicalMaterial({ color:0x0c0c0c, roughness:0.35, metalness:0.2, clearcoat:0.5 });
-const capGeo = new THREE.CylinderGeometry(0.46, 0.46, 0.85, 32, 4);
-const cap = new THREE.Mesh(capGeo, capMat);
-cap.position.y = 2.55;
-bottleGroup.add(cap);
-// cap ridges via thin torus rings
-for(let i=0;i<5;i++){
-  const ringGeo = new THREE.TorusGeometry(0.465, 0.012, 8, 32);
-  const ring = new THREE.Mesh(ringGeo, new THREE.MeshStandardMaterial({color:0x1a1a1a, roughness:0.5, metalness:0.3}));
-  ring.rotation.x = Math.PI/2;
-  ring.position.y = 2.25 + i*0.14;
-  bottleGroup.add(ring);
-}
-
-/* label */
-const labelTex = buildLabelTexture();
-const labelMat = new THREE.MeshPhysicalMaterial({ map: labelTex, transparent:true, roughness:0.4, clearcoat:0.3 });
-const labelGeo = new THREE.CylinderGeometry(1.035, 1.035, 1.55, 48, 1, true, -0.95, 1.9);
-const label = new THREE.Mesh(labelGeo, labelMat);
-label.position.y = 0.05;
-bottleGroup.add(label);
-
-bottleGroup.position.y = -0.35;
-bottleGroup.scale.setScalar(0.92);
-
-/* --- controls (rotation only) --- */
-const controls = new OrbitControls(camera, canvas);
-controls.enableZoom = false;
-controls.enablePan = false;
-controls.minPolarAngle = Math.PI/2 - 0.35;
-controls.maxPolarAngle = Math.PI/2 + 0.35;
-controls.enableDamping = true;
-controls.dampingFactor = 0.06;
-controls.rotateSpeed = 0.6;
-controls.target.set(0,0.05,0);
-
-let userInteracting = false;
-canvas.addEventListener('pointerdown', ()=>{ userInteracting = true; document.querySelector('.drag-hint').style.opacity = 0; });
-canvas.addEventListener('pointerup', ()=>{ setTimeout(()=> userInteracting=false, 2500); });
-
-/* --- scroll reacts on light + camera within hero --- */
-ScrollTrigger.create({
-  trigger:'#hero',
-  start:'top top',
-  end:'bottom top',
-  scrub:0.5,
-  onUpdate:(self)=>{
-    glowLight.intensity = 4 + self.progress*5;
-    glowLight.position.z = 2.4 - self.progress*1.5;
-    camera.position.y = 0.15 + self.progress*0.5;
-    bottleGroup.rotation.x = self.progress*0.15;
-    renderer.domElement.style.opacity = 1 - self.progress*0.9;
-  }
-});
-
-/* --- render loop --- */
-const clock = new THREE.Clock();
-function animate(){
-  requestAnimationFrame(animate);
-  const dt = clock.getDelta();
-  if(!userInteracting){ bottleGroup.rotation.y += dt*0.18; }
-  controls.update();
-  renderer.render(scene, camera);
-}
-animate();
-</script>
+        animate();
+        playBreakSequence();
+    </script>
 </body>
 </html>
