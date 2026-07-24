@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Appearich - Sugar Candy Perfume Experience</title>
+    <title>Appearich - Coconut Passion</title>
     <style>
         * {
             margin: 0;
@@ -13,12 +13,12 @@
         }
 
         body {
-            background-color: #0b0a08;
-            color: #f7f3ed;
+            background-color: #050b07; /* Dark Emerald Forest Theme */
+            color: #f2ebd9;
             overflow-x: hidden;
         }
 
-        /* 3D Canvas Background */
+        /* Fixed 3D WebGL Canvas */
         #webgl-container {
             position: fixed;
             top: 0;
@@ -39,63 +39,89 @@
             height: 100vh;
             display: flex;
             align-items: center;
-            padding: 0 10%;
+            padding: 0 8%;
             pointer-events: none;
         }
 
         .content-box {
-            max-width: 450px;
-            background: rgba(15, 14, 12, 0.65);
+            max-width: 480px;
+            background: rgba(10, 20, 14, 0.75);
             padding: 2.5rem;
             border-radius: 12px;
-            border: 1px solid rgba(223, 183, 108, 0.3);
-            backdrop-filter: blur(10px);
-            opacity: 0; /* Animated by GSAP */
+            border: 1px solid rgba(223, 183, 108, 0.35);
+            backdrop-filter: blur(12px);
+            opacity: 0; /* Animated via GSAP */
             transform: translateY(30px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+        }
+
+        .brand-subtitle {
+            text-transform: uppercase;
+            letter-spacing: 0.25em;
+            color: #dfb76c;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
         }
 
         h1 {
             font-size: 3.5rem;
+            color: #ffffff;
+            margin-bottom: 0.2rem;
+            line-height: 1.1;
+        }
+
+        .scent-name {
+            font-size: 2rem;
             color: #dfb76c;
-            margin-bottom: 0.5rem;
-            letter-spacing: 0.05em;
+            font-style: italic;
+            margin-bottom: 1rem;
         }
 
         h2 {
-            font-size: 2.2rem;
+            font-size: 2rem;
             color: #dfb76c;
             margin-bottom: 1rem;
         }
 
         p {
-            font-size: 1.1rem;
+            font-size: 1.05rem;
             line-height: 1.6;
-            color: #d1c7bd;
+            color: #cbbfae;
             margin-bottom: 1rem;
         }
 
-        .notes-list {
-            list-style: none;
-            margin-top: 1rem;
+        /* 3-Step Fragrance Details Cards */
+        .detail-step {
+            background: rgba(223, 183, 108, 0.08);
+            border-left: 3px solid #dfb76c;
+            padding: 10px 15px;
+            margin-bottom: 12px;
+            border-radius: 0 6px 6px 0;
         }
 
-        .notes-list li {
-            padding: 6px 0;
-            border-bottom: 1px solid rgba(223, 183, 108, 0.2);
-            color: #f7f3ed;
+        .detail-step h4 {
+            color: #dfb76c;
             font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .detail-step p {
+            margin: 0;
+            font-size: 0.9rem;
+            color: #f2ebd9;
         }
 
         .btn-buy {
             pointer-events: auto;
             display: inline-block;
-            margin-top: 1.5rem;
+            margin-top: 1rem;
             background: #dfb76c;
-            color: #0b0a08;
+            color: #0a140e;
             padding: 14px 32px;
             text-decoration: none;
             font-weight: bold;
-            letter-spacing: 0.15em;
+            letter-spacing: 0.2em;
             text-transform: uppercase;
             border-radius: 4px;
             transition: all 0.3s ease;
@@ -104,11 +130,11 @@
         }
 
         .btn-buy:hover {
-            background: #fff;
+            background: #ffffff;
             box-shadow: 0 0 25px rgba(223, 183, 108, 0.6);
         }
 
-        /* Helper to position sections */
+        /* Alignments */
         #sec-1 { justify-content: flex-start; }
         #sec-2 { justify-content: flex-end; }
         #sec-3 { justify-content: flex-start; }
@@ -126,41 +152,53 @@
     <div id="webgl-container"></div>
 
     <div class="scroll-container">
-        <!-- Section 1: Intro / Coconut Break -->
+        <!-- Section 1: Forest Drop & Intro -->
         <section id="sec-1">
             <div class="content-box" id="box-1">
+                <div class="brand-subtitle">Extrait de Parfum</div>
                 <h1>APPEARICH</h1>
-                <p><strong>SUGAR CANDY</strong> — Extrait de Parfum</p>
-                <p>Born from nature. Revealed through an exotic fusion of golden coconut essence.</p>
+                <div class="scent-name">Coconut Passion</div>
+                <p>Born deep within the tropical canopy. Unveiling nature's most enchanting fragrance.</p>
             </div>
         </section>
 
-        <!-- Section 2: Oil Infusion & Notes -->
+        <!-- Section 2: Oil Infusion & Pulling Closer -->
         <section id="sec-2">
             <div class="content-box" id="box-2">
-                <h2>Exotic Infusion</h2>
-                <p>Infused with pure golden coconut oil for a long-lasting, velvety aroma on the skin.</p>
-                <ul class="notes-list">
-                    <li><strong>Top Notes:</strong> Toasted Coconut, Sunlit Bergamot</li>
-                    <li><strong>Heart Notes:</strong> Warm Vanilla, Caramel Sugar</li>
-                    <li><strong>Base Notes:</strong> Golden Amber, Rich Musk</li>
-                </ul>
+                <div class="brand-subtitle">Step 1 — Pure Infusion</div>
+                <h2>Oil-Infused Essence</h2>
+                <p>Filled with pure golden coconut oil extract for a rich, silky scent that lingers gracefully on the skin.</p>
             </div>
         </section>
 
-        <!-- Section 3: Kinetic Motion -->
+        <!-- Section 3: 3-Step Scent Pyramid Details -->
         <section id="sec-3">
             <div class="content-box" id="box-3">
-                <h2>Velvet Dynamics</h2>
-                <p>Gliding seamlessly across silk like liquid gold. Pure elegance in every dimension.</p>
+                <div class="brand-subtitle">Step 2 — Fragrance Notes</div>
+                <h2>The Scent Journey</h2>
+                
+                <div class="detail-step">
+                    <h4>1. Top Notes</h4>
+                    <p>Toasted Coconut & Tropical Bergamot Mist</p>
+                </div>
+                <div class="detail-step">
+                    <h4>2. Heart Notes</h4>
+                    <p>Warm Vanilla Nectar & Creamy Sugar Candy</p>
+                </div>
+                <div class="detail-step">
+                    <h4>3. Base Notes</h4>
+                    <p>Golden Sunlit Amber & Soft Cashmere Wood</p>
+                </div>
             </div>
         </section>
 
         <!-- Section 4: Aromatic Bloom & Shop -->
         <section id="sec-4">
             <div class="content-box" id="box-4">
-                <h2>Unveil Your Scent</h2>
-                <p>Experience the signature sweet warmth of <strong>Appearich Sugar Candy</strong> today.</p>
+                <div class="brand-subtitle">Step 3 — Experience</div>
+                <h2>APPEARICH</h2>
+                <div class="scent-name">Coconut Passion</div>
+                <p>Elevate your presence with the warmth of golden luxury.</p>
                 <button class="btn-buy">SHOP NOW — $120</button>
             </div>
         </section>
@@ -172,10 +210,10 @@
         // --- 1. THREE.JS SCENE SETUP ---
         const container = document.getElementById('webgl-container');
         const scene = new THREE.Scene();
-        scene.fog = new THREE.FogExp2(0x0b0a08, 0.04);
+        scene.fog = new THREE.FogExp2(0x050b07, 0.035); // Forest Fog
 
         const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
-        camera.position.set(0, 0, 7);
+        camera.position.set(0, 0, 8);
 
         const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
@@ -184,21 +222,60 @@
         container.appendChild(renderer.domElement);
 
         // --- 2. LIGHTING ---
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+        const ambientLight = new THREE.AmbientLight(0x2d4a36, 1.2); // Jungle green tint
         scene.add(ambientLight);
 
-        const spotLight = new THREE.SpotLight(0xffdf9e, 3);
-        spotLight.position.set(5, 8, 5);
+        const spotLight = new THREE.SpotLight(0xffdf9e, 3.5); // Golden sunlight ray
+        spotLight.position.set(5, 10, 5);
         spotLight.castShadow = true;
         scene.add(spotLight);
 
-        const rimLight = new THREE.PointLight(0xdfb76c, 2, 10);
+        const rimLight = new THREE.PointLight(0x4caf50, 2, 10); // Emerald back glow
         rimLight.position.set(-4, 2, -2);
         scene.add(rimLight);
 
-        // --- 3. 3D OBJECTS ---
+        // --- 3. CREATIVE FOREST BACKGROUND & ATMOSPHERE ---
+        
+        // Forest Canopy Trees (Stylized 3D Cones/Cylinders)
+        const forestGroup = new THREE.Group();
+        const treeMat = new THREE.MeshStandardMaterial({ color: 0x0a1c10, roughness: 0.9 });
+        
+        for (let i = 0; i < 25; i++) {
+            const treeGeo = new THREE.ConeGeometry(1 + Math.random() * 0.8, 4 + Math.random() * 3, 6);
+            const tree = new THREE.Mesh(treeGeo, treeMat);
+            tree.position.set(
+                (Math.random() - 0.5) * 20,
+                -2 + Math.random() * 2,
+                -3 - Math.random() * 10
+            );
+            forestGroup.add(tree);
+        }
+        scene.add(forestGroup);
 
-        // Coconut Group (Placeholders for impact sequence)
+        // Forest Fireflies / Floating Golden Spores
+        const sporeCount = 150;
+        const sporeGeo = new THREE.BufferGeometry();
+        const sporePos = new Float32Array(sporeCount * 3);
+
+        for (let i = 0; i < sporeCount; i++) {
+            sporePos[i * 3] = (Math.random() - 0.5) * 15;
+            sporePos[i * 3 + 1] = (Math.random() - 0.5) * 10;
+            sporePos[i * 3 + 2] = (Math.random() - 0.5) * 10;
+        }
+
+        sporeGeo.setAttribute('position', new THREE.BufferAttribute(sporePos, 3));
+        const sporeMat = new THREE.PointsMaterial({
+            color: 0xdfb76c,
+            size: 0.05,
+            transparent: true,
+            opacity: 0.6
+        });
+        const forestSpores = new THREE.Points(sporeGeo, sporeMat);
+        scene.add(forestSpores);
+
+        // --- 4. COCONUT & APPEARICH BOTTLE ---
+
+        // Coconut
         const coconutGroup = new THREE.Group();
         const coconutGeo = new THREE.SphereGeometry(1.2, 32, 32);
         const coconutMat = new THREE.MeshStandardMaterial({ color: 0x3d2314, roughness: 0.9 });
@@ -206,23 +283,22 @@
         coconutGroup.add(coconut);
         scene.add(coconutGroup);
 
-        // Appearich Perfume Bottle Group
+        // Appearich - Coconut Passion Bottle
         const bottleGroup = new THREE.Group();
 
-        // Fluted Glass Body (Matches Appearich Sugar Candy ribbed design)
+        // Ribbed Glass Body
         const bottleBodyGeo = new THREE.CylinderGeometry(0.8, 0.8, 2.2, 32);
         const bottleBodyMat = new THREE.MeshPhysicalMaterial({
             color: 0xffffff,
             transparent: true,
             opacity: 0.35,
             roughness: 0.1,
-            metalness: 0.1,
             transmission: 0.85,
             ior: 1.5
         });
         const bottleMesh = new THREE.Mesh(bottleBodyGeo, bottleBodyMat);
 
-        // Inner Golden Liquid (Fills up on scroll)
+        // Inner Golden Liquid (Animates filling)
         const liquidGeo = new THREE.CylinderGeometry(0.72, 0.72, 1.8, 32);
         const liquidMat = new THREE.MeshStandardMaterial({
             color: 0xe6a100,
@@ -231,7 +307,7 @@
         });
         const liquidMesh = new THREE.Mesh(liquidGeo, liquidMat);
         liquidMesh.position.y = -0.1;
-        liquidMesh.scale.y = 0.1; // Starts low, fills on scroll
+        liquidMesh.scale.y = 0.05; // Starts empty
 
         // Black Ribbed Cap
         const capGeo = new THREE.CylinderGeometry(0.42, 0.42, 0.7, 32);
@@ -239,24 +315,24 @@
         const capMesh = new THREE.Mesh(capGeo, capMat);
         capMesh.position.y = 1.45;
 
-        // Label Plate ("APPEARICH SUGAR CANDY")
+        // Label Plate ("APPEARICH - Coconut Passion")
         const labelGeo = new THREE.PlaneGeometry(0.9, 1.0);
-        const labelMat = new THREE.MeshStandardMaterial({ color: 0x2b1323, roughness: 0.5 }); // Dark maroon label
+        const labelMat = new THREE.MeshStandardMaterial({ color: 0x2b1323, roughness: 0.5 });
         const labelMesh = new THREE.Mesh(labelGeo, labelMat);
         labelMesh.position.set(0, 0, 0.81);
 
         bottleGroup.add(bottleMesh, liquidMesh, capMesh, labelMesh);
-        bottleGroup.scale.set(0, 0, 0); // Hidden initially
+        bottleGroup.scale.set(0, 0, 0); // Starts hidden
         scene.add(bottleGroup);
 
-        // --- AROMATIC BLOOM SPRAY PARTICLES ---
+        // Mist Particles for Aromatic Bloom
         const particleCount = 200;
         const particleGeo = new THREE.BufferGeometry();
         const particlePositions = new Float32Array(particleCount * 3);
 
         for (let i = 0; i < particleCount; i++) {
             particlePositions[i * 3] = (Math.random() - 0.5) * 0.2;
-            particlePositions[i * 3 + 1] = 1.8; // Spouts from top of cap
+            particlePositions[i * 3 + 1] = 1.8;
             particlePositions[i * 3 + 2] = (Math.random() - 0.5) * 0.2;
         }
 
@@ -270,13 +346,13 @@
         const mistParticles = new THREE.Points(particleGeo, particleMat);
         scene.add(mistParticles);
 
-        // --- 4. INTRO ANIMATION (Coconut Drops & Reveals Bottle) ---
-        coconutGroup.position.set(0, 6, 0);
+        // --- 5. INTRO ANIMATION (Coconut Falls in Forest) ---
+        coconutGroup.position.set(0, 7, 0);
 
         const introTL = gsap.timeline();
         introTL.to(coconutGroup.position, {
-            y: 0,
-            duration: 1,
+            y: -0.2,
+            duration: 1.2,
             ease: "power3.in"
         })
         .to(coconutGroup.scale, {
@@ -286,7 +362,7 @@
         .to(bottleGroup.scale, { x: 1, y: 1, z: 1, duration: 1, ease: "back.out(1.7)" }, "-=0.1")
         .to('#box-1', { opacity: 1, y: 0, duration: 0.8 }, "-=0.5");
 
-        // --- 5. SCROLLTRIGGER ANIMATION SEQUENCE ---
+        // --- 6. SCROLLTRIGGER ANIMATION SEQUENCE ---
 
         const mainTL = gsap.timeline({
             scrollTrigger: {
@@ -297,39 +373,47 @@
             }
         });
 
-        // STEP 1: Move bottle to right, fill with golden liquid, reveal Section 2
-        mainTL.to(bottleGroup.position, { x: -1.8, y: -0.2, z: 0 })
-              .to(bottleGroup.rotation, { y: Math.PI * 0.5 }, "<")
-              .to(liquidMesh.scale, { y: 1 }, "<") // Liquid fills bottle
+        // STEP 1: Pull bottle closer, fill with oil, move to right
+        mainTL.to(bottleGroup.position, { x: -1.8, y: 0, z: 2.5 }) // Pulls closer to camera
+              .to(liquidMesh.scale, { y: 1 }, "<") // Oil fills up
               .to('#box-1', { opacity: 0, y: -30 }, "<")
               .to('#box-2', { opacity: 1, y: 0 }, "-=0.3")
 
-        // STEP 2: Kinetic Roll & Slide towards viewer, reveal Section 3
-              .to(bottleGroup.rotation, { z: -Math.PI / 3, x: Math.PI / 4, y: Math.PI }, "+=0.2")
-              .to(bottleGroup.position, { x: 1.8, y: -0.5, z: 2.5 }, "<") // Rolls forward & slides right
+        // STEP 2: Rotate bottle to showcase 3 detail steps
+              .to(bottleGroup.rotation, { y: Math.PI * 2 })
+              .to(bottleGroup.position, { x: 1.8, y: -0.2, z: 2.0 }, "<")
               .to('#box-2', { opacity: 0, y: -30 }, "<")
               .to('#box-3', { opacity: 1, y: 0 }, "-=0.3")
 
-        // STEP 3: Bottle stands upright in center, Aromatic Bloom spray, reveal Section 4
-              .to(bottleGroup.rotation, { z: 0, x: 0, y: Math.PI * 2 })
-              .to(bottleGroup.position, { x: 0, y: -0.8, z: 1.5 }, "<")
-              .to(particleMat, { opacity: 1 }, "-=0.2") // Spray particles bloom
+        // STEP 3: Rolling motion towards viewer & center upright bloom
+              .to(bottleGroup.rotation, { z: -Math.PI / 4, x: Math.PI / 6 }, "+=0.2")
+              .to(bottleGroup.position, { x: 0, y: -0.5, z: 3.5 }, "<") // Rolls very close
+              .to(bottleGroup.rotation, { z: 0, x: 0, y: Math.PI * 2 }, "+=0.3")
+              .to(bottleGroup.position, { x: 0, y: -0.8, z: 2.0 }, "<")
+              .to(particleMat, { opacity: 1 }, "-=0.2") // Spray mist blooms
               .to('#box-3', { opacity: 0, y: -30 }, "<")
               .to('#box-4', { opacity: 1, y: 0 }, "-=0.2");
 
-        // --- 6. RENDER LOOP ---
+        // --- 7. RENDER LOOP ---
         function animate() {
             requestAnimationFrame(animate);
+
+            // Gently float spores in forest background
+            const sporeArr = forestSpores.geometry.attributes.position.array;
+            for (let i = 0; i < sporeCount; i++) {
+                sporeArr[i * 3 + 1] += 0.005;
+                if (sporeArr[i * 3 + 1] > 5) sporeArr[i * 3 + 1] = -5;
+            }
+            forestSpores.geometry.attributes.position.needsUpdate = true;
 
             // Animate spray mist blooming outward when active
             if (particleMat.opacity > 0) {
                 const pos = mistParticles.geometry.attributes.position.array;
                 for (let i = 0; i < particleCount; i++) {
-                    pos[i * 3 + 1] += 0.015; // move upward
+                    pos[i * 3 + 1] += 0.015;
                     pos[i * 3] += (Math.random() - 0.5) * 0.01;
                     pos[i * 3 + 2] += (Math.random() - 0.5) * 0.01;
 
-                    // Reset particle when too high
                     if (pos[i * 3 + 1] > 3.5) {
                         pos[i * 3 + 1] = 1.4;
                         pos[i * 3] = (Math.random() - 0.5) * 0.2;
